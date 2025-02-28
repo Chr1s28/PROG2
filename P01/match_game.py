@@ -9,6 +9,7 @@ class Strategy(Enum):
 
 class MatchGame:
     def __init__(self, strategy=Strategy.RANDOM):
+        '''gets the gaming strategy of the computer and derives who starts the game'''
         self.stack = random.randint(10, 20)
         self.user_first = bool(random.randint(0, 1))
         self.strategy = strategy
@@ -22,10 +23,12 @@ class MatchGame:
         print(f"{'You' if self.user_first else 'Computer'} go first.")
 
     def display_progress(self):
+        '''displays the "game board"'''
         print(f"\nMatches left: {self.stack}")
         print("========O\n" * self.stack)
 
     def user_draw(self):
+        '''user selection of draws'''
         while True:
             try:
                 user_input = int(input("How many matches do you want to draw (1-3)? "))
@@ -39,6 +42,7 @@ class MatchGame:
                 print("Please enter a valid number.")
     
     def computer_draw(self):
+        '''computer selection of draws based on given strategy'''
         if self.strategy == Strategy.RANDOM:
             # Random strategy - just pick 1-3 randomly
             com_input = min(random.randint(1, 3), self.stack)
@@ -56,6 +60,7 @@ class MatchGame:
         print(f"Computer drew {com_input} matches.")
 
     def validate_outcome(self):
+        '''checks the results after each draw to determine whether the game ended and if yes who lost the game'''
         if self.stack <= 0:
             if self.turn == "user":
                 print("\nYou drew the last match. You lost!")
@@ -65,9 +70,11 @@ class MatchGame:
         return False
 
     def draw(self, input):
+        '''tracks how many draws still remain in the game'''
         self.stack -= input
 
     def play(self):
+        '''controlls the programm flow and what to do when'''
         while self.stack > 0:
             self.display_progress()
             
@@ -83,5 +90,5 @@ class MatchGame:
                 self.turn = "user"
 
 if __name__ == '__main__':    
-    game = MatchGame(strategy=Strategy.RANDOM)
-    game.play()
+    game = MatchGame(strategy=Strategy.RANDOM) #change strategy here
+    game.play() #starts the game
