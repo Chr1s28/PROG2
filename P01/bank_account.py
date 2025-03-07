@@ -9,8 +9,7 @@ class BankAccount:
     def __init__(self, iban: str, currency: str = "CHF"):
         self.iban = iban
         self._currency = currency
-
-        self.account_open = True
+        self.open = True
         self.balance = Decimal("0")
         self.min_balance = Decimal("0")
         self.max_balance = Decimal("100000")
@@ -20,9 +19,9 @@ class BankAccount:
         """This is to make a "private" attribute, although there is no such thing in python as self._currency can still be changed"""
         return self._currency
 
-    def do_deposit(self, amount: str | Decimal) -> Decimal:
+    def deposit(self, amount: str | Decimal) -> Decimal:
         """Deposit an amount into the acount with all the necessary validators. Note: We may want to abstract these validators in the future."""
-        if self.account_open:
+        if self.open:
             if type(amount) is str:
                 amount = Decimal(amount)
             if self.balance + amount <= self.max_balance:
@@ -32,9 +31,9 @@ class BankAccount:
         else:
             raise ValueError("Deposit not possible on closed account")
 
-    def do_withdrawal(self, amount: str | Decimal) -> Decimal:
+    def withdraw(self, amount: str | Decimal) -> Decimal:
         """Withdraw an amount from the acount with all the necessary validators. Note: We may want to abstract these validators in the future."""
-        if self.account_open:
+        if self.open:
             if type(amount) is str:
                 amount = Decimal(amount)
 
@@ -45,18 +44,18 @@ class BankAccount:
         else:
             raise ValueError("Withdrawal not possible on closed account")
 
-    def close_account(self) -> None:
+    def close(self) -> None:
         """Closes the account, no method to reopen is provided as that has to be done by a bank teller"""
-        if self.account_open:
-            self.account_open = False
+        if self.open:
+            self.open = False
 
 
 if __name__ == "__main__":
     my_account = BankAccount("CH1234567890")
     print(my_account.balance)
     print(my_account.currency)
-    my_account.do_deposit("37.50")
+    my_account.deposit("37.50")
     print(my_account.balance)
-    my_account.do_withdrawal(Decimal(20))
+    my_account.withdraw(Decimal(20))
     print(my_account.balance)
-    my_account.close_account()
+    my_account.close()
