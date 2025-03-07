@@ -1,98 +1,158 @@
-#Represent contents of a typical classroom (table, blackboard, student, teacher,
-#document) as Python class structures, each with class name, constructor method and
-#attributes. Some attributes may cross-reference objects of other classes. Instantiate the
-#classes as multiple objects, using range iterations if adequate, to represent the following
-#scenario: The teacher has 20 copies of a document. There are 10 tables, and each
-#table is occupied by two students. Each document belongs to one of the students. On
-#the blackboard, the name of the teacher is written.
-
-
-class Teacher:
-    def __init__(self,name):
-        self.name = name
-        self.documents = [Document(doc_id=i+1) for i in range(20)]
-    
-    def __repr__(self):
-        return f"Teacher(name='{self.name}')"
-    
 class Document:
-    def __init__(self, doc_id, owner=None):
-        self.doc_id = doc_id
-        self.owner = owner
+    """This is a class representation of a document.
 
-    def __repr__(self):
-        if self.owner:
-            owner_name = self.owner.name  
-        else: 
-            owner_name = "None"
-        return f"Document(id = {self.doc_id}, owner = {owner_name})"
+    :param title: The title of the document
+    :type title: str
+    """
 
-class Student:
-    def __init__(self, name, table, document):
-        self.name = name
-        self.table = table
-        self.document = document
-    def __repr__(self):
-        if self.table:
-            table_id = self.table_id
-        else:
-            table_id = "None"
-        if self.doc_id:
-            doc_id = self.doc_id
-        else:
-            doc_id = "None"
+    def __init__(self, title: str):
+        self.title = title
+        self.owner: "ClassPerson" = None
+
+    def __str__(self):
+        return f"Document(title='{self.title}', owner='{self.owner.name if self.owner else None}')"
+
 
 class Table:
-    def __init__(self, table_id):
-        self.table_id = table_id
-        self.students = []
+    """This is a class representation of a table.
 
-    def __repr__(self):
-        return f"Table(id = {self.table_id}, students = {[student.name for student in self.students]})"
-    
+    :param number: The number of the table
+    :type number: int
+    """
+
+    def __init__(self, number: int):
+        self.number = number
+        self.occupants: list["Student"] = []
+
+    def __str__(self):
+        return f"Table(number={self.number}, occupants={[occupant.name for occupant in self.occupants]})"
+
+
 class Blackboard:
-    def __init__(self, blackboard_id, content):
-        self.blackboard_id = blackboard_id
+    """This is a class representation of a blackboard.
+
+    :param content: The content written on the blackboard
+    :type content: str
+    """
+
+    def __init__(self, content: str):
         self.content = content
-    
-    def __repr__(self):
-        return f"Blackboard(id = {self.blackboard_id}, content = {self.content})"
-    
 
-teacher_meier = Teacher("Meier")
-blackboard = Blackboard(1, teacher_meier.name)
-tables = [Table(table_id=i+1) for i in range(10)]
-students = []
-doc_index = 0 
+    def __str__(self):
+        return f"Blackboard(content='{self.content}')"
 
-for table in tables:
-    # For each table, create two students.
-    for i in range(2):
-        student_name = f"Student_{table.table_id}_{i+1}"
-        # Get the next available document from the teacher's documents.
-        doc = teacher_meier.documents[doc_index]
-        doc.owner = None  # Temporarily clear owner
-        # Create the student with the table reference and document.
-        student = Student(name=student_name, table=table, document=doc)
-        # Now, assign the document's owner as this student.
-        doc.owner = student
-        
-        # Add student to the table and to the global student list.
-        table.students.append(student)
-        students.append(student)
-        
-        doc_index += 1
 
-# -------------------------------------------------------------------
-# Output a summary of the created objects
+class ClassPerson:
+    """This is a class representation of a person in the class.
 
-print("Teacher:", teacher_meier)
-print("Blackboard:", blackboard)
-print("\nTables and their students:")
-for table in tables:
-    print(table)
+    :param name: The name of the person
+    :type name: str
+    """
 
-print("\nA few sample documents:")
-# Print first 5 documents to check ownership
-for doc in teacher_meier.documents[:5]:
-    print(doc)
+    def __init__(self, name: str):
+        self.name = name
+        self.documents: list[Document] = []
+
+    def assign_document(self, document: Document):
+        """Assigns a document to the person.
+
+        If the document is already assigned to another person, it will be reassigned to this person.
+
+        :param document: The document to be assigned
+        :type document: Document
+        """
+
+        if document.owner:
+            document.owner.documents.remove(document)
+
+        document.owner = self
+        self.documents.append(document)
+
+    def __str__(self):
+        return f"ClassPerson(name='{self.name}', documents={[doc.title for doc in self.documents]})"
+
+
+class Student(ClassPerson):
+    """This is a class representation of a student.
+
+    :param name: The name of the student
+    :type name: str
+    """
+
+    def __init__(self, name: str):
+        self.table: Table = None
+        super().__init__(name)
+
+    def sit(self, table: Table):
+        """Seats the student at a table.
+
+        If the student is already seated at another table, they will be removed from that table first.
+
+        :param table: The table at which the student will sit
+        :type table: Table
+        """
+
+        if self.table:
+            self.table.occupants.remove(self)
+
+        self.table = table
+        table.occupants.append(self)
+
+    def __str__(self):
+        return f"Student(name='{self.name}', documents={[doc.title for doc in self.documents]})"
+
+
+class Teacher(ClassPerson):
+    """This is a class representation of a teacher.
+
+    :param name: The name of the teacher
+    :type name: str
+    """
+
+    def __init__(self, name: str):
+        super().__init__(name)
+
+    def __str__(self):
+        return f"Teacher(name='{self.name}', documents={[doc.title for doc in self.documents]})"
+
+
+if __name__ == "__main__":
+    # create teacher
+    teacher = Teacher("Mr. Roth")
+
+    # teacher writes on blackboard
+    blackboard = Blackboard(f"Hi class, my name is '{teacher.name}'")
+
+    # teacher creates copies of documents
+    for i in range(20):
+        teacher.assign_document(Document(f"Document {i}"))
+
+    # create tables
+    tables = [Table(i + 1) for i in range(10)]
+
+    # create students
+    students = [Student(f"Student {i}") for i in range(20)]
+
+    # students are seated at tables
+    for student in students:
+        for table in tables:
+            if len(table.occupants) < 2:
+                student.sit(table)
+                break
+
+    # documents are handed out to students
+    for i, document in enumerate(teacher.documents[:]):
+        students[i].assign_document(document)
+
+    # Classroom showcase
+    print("===Classroom===")
+    print(f"Blackboard: {blackboard.content}")
+    print(f"Teacher: {teacher}")
+
+    print("Tables:")
+    for table in tables:
+        print(f"  {table}")
+
+    print("Students:")
+    for student in students:
+        print(f"  {student}")
