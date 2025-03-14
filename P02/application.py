@@ -1,61 +1,66 @@
 import random
 import string
-from rich import print
-from rich.prompt import Prompt
-from rich.console import Console
-from rich.table import Table as RichTable
-import bcrypt
 from datetime import date
+from typing import Dict, List, Union
 
-from saving_account import SavingAccount
-from youth_account import YouthAccount
+import bcrypt
+from rich import print
+from rich.console import Console
+from rich.prompt import Prompt
+from rich.table import Table as RichTable
 
-salt = b"$2b$12$lshujjHFpMf4uNenohn2tOjbvMkZeWzNniwEfeI0yjdCGqw29zvc."
+from .saving_account import SavingAccount
+from .youth_account import YouthAccount
 
 
 class ClientAccounts:
     """
     A class to manage multiple bank accounts for a client.
-    
+
     This class provides functionality to create, manage, and interact with
     different types of bank accounts (SavingAccount and YouthAccount).
-    
+
     :ivar accounts: Dictionary storing all client accounts
-    :type accounts: dict
+    :type accounts: Dict[str, Union[SavingAccount, YouthAccount]]
     :ivar current_account: Reference to the currently selected account
-    :type current_account: BankAccount or None
+    :type current_account: Union[SavingAccount, YouthAccount, None]
     :ivar console: Rich console for formatted output
     :type console: Console
     :ivar account_owners: Dictionary mapping account names to lists of owners
-    :type account_owners: dict
+    :type account_owners: Dict[str, List[str]]
     """
-    def __init__(self):
-        self.accounts = {}
-        self.current_account = None
-        self.console = Console()
-        self.account_owners = {}
 
-        password = Prompt.ask("Set password", password=True)
-        self.password_hash = bcrypt.hashpw(bytes(password, encoding="utf-8"), salt)
+    def __init__(self) -> None:
+        self.accounts: Dict[str, Union[SavingAccount, YouthAccount]] = {}
+        self.current_account: Union[SavingAccount, YouthAccount, None] = None
+        self.console: Console = Console()
+        self.account_owners: Dict[str, List[str]] = {}
+
+        password: str = Prompt.ask("Set password", password=True)
+        self.password_hash: bytes = bcrypt.hashpw(
+            bytes(password, encoding="utf-8"), b"$2b$12$lshujjHFpMf4uNenohn2tOjbvMkZeWzNniwEfeI0yjdCGqw29zvc."
+        )
 
     def __check_password(self, password: str) -> bool:
         """
         Verify if the provided password matches the stored hash.
-        
+
         :param password: The password to verify
         :type password: str
         :return: True if password matches, False otherwise
         :rtype: bool
         """
+
         return bcrypt.checkpw(bytes(password, encoding="utf-8"), self.password_hash)
 
-    def __display_accounts(self):
+    def __display_accounts(self) -> None:
         """
         Display all accounts in a table format.
-        
+
         Creates a rich table showing account details including name,
         type, IBAN, balance, status, and owners.
         """
+
         if not self.accounts:
             print("[yellow]No accounts available.[/yellow]")
             return
@@ -77,15 +82,16 @@ class ClientAccounts:
 
         self.console.print(table)
 
-    def __manage_account(self):
+    def __manage_account(self) -> None:
         """
         Manage a selected account with various operations.
-        
+
         Allows the user to perform operations on a selected account such as
         deposit, withdraw, check balance, change interest rate, etc.
-        
+
         :raises ValueError: If operations fail due to account restrictions
         """
+
         if not self.accounts:
             print("[red]No accounts available to manage.[/red]")
             return
@@ -163,13 +169,14 @@ class ClientAccounts:
                     self.current_account = None
                     break
 
-    def __add_account_owner(self, account_name):
+    def __add_account_owner(self, account_name: str) -> None:
         """
         Add an additional owner to an account.
-        
+
         :param account_name: The name of the account to add an owner to
         :type account_name: str
         """
+
         new_owner = Prompt.ask("Enter name of additional owner")
 
         if account_name not in self.account_owners:
@@ -178,15 +185,16 @@ class ClientAccounts:
         self.account_owners[account_name].append(new_owner)
         print(f"[green]{new_owner} added as owner to account {account_name}[/green]")
 
-    def __add_account(self):
+    def __add_account(self) -> None:
         """
         Add a new bank account.
-        
+
         Creates either a SavingAccount or YouthAccount based on user input.
         Generates a random IBAN and prompts for necessary information.
-        
+
         :raises ValueError: If account creation fails due to restrictions
         """
+
         option = Prompt.ask("Which type of account?", choices=["Saving account", "Youth account"])
 
         iban = "CH" + "".join(random.choices(string.digits, k=18)) + random.choice(string.ascii_uppercase)
@@ -219,10 +227,11 @@ class ClientAccounts:
     def run(self) -> None:
         """
         Run the bank application.
-        
+
         Main method that starts the application, handles authentication,
         and provides the main menu for account management.
         """
+
         password = Prompt.ask("Enter password", password=True)
         if self.__check_password(password):
             exit = False
