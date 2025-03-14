@@ -1,6 +1,7 @@
 from decimal import Decimal
 from datetime import datetime, date
-from P02.bank_account import BankAccount
+
+from bank_account import BankAccount
 
 class YouthAccount(BankAccount):
     """

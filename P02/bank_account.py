@@ -54,14 +54,3 @@ class BankAccount:
         """Opens the account"""
         if not self.opened:
             self.opened = True
-
-
-if __name__ == "__main__":
-    my_account = BankAccount("CH1234567890")
-    print(my_account.balance)
-    print(my_account.currency)
-    my_account.deposit("37.50")
-    print(my_account.balance)
-    my_account.withdraw(Decimal(-20)) 
-    print(my_account.balance)
-    my_account.close()

@@ -1,9 +1,6 @@
 from decimal import Decimal
-import sys
-import os
 
-# Add the parent directory to sys.path to import from P02
-from P02.bank_account import BankAccount
+from bank_account import BankAccount
 
 class SavingAccount(BankAccount):
     """
