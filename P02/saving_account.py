@@ -37,7 +37,7 @@ class SavingAccount(BankAccount):
         Withdraw an amount from the account with all the necessary validators.
         Applies a 2% charge if balance is below zero after withdrawal.
         """
-        amount = self.__validate_transaction(amount)
+        amount = self._BankAccount__validate_transaction(amount)
         
         if self.balance - amount >= self.min_balance:
             self.balance -= amount
