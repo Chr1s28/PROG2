@@ -1,6 +1,6 @@
 from decimal import Decimal
 from datetime import datetime, date
-from bank_account import BankAccount
+from P02.bank_account import BankAccount
 
 class YouthAccount(BankAccount):
     """
@@ -13,7 +13,8 @@ class YouthAccount(BankAccount):
         """
         super().__init__(iban, currency)
         
-        age =  datetime.now().year - birth_date.year
+        today = datetime.now().date()
+        age = today.year - birth_date.year - ((today.month, today.day) < (birth_date.month, birth_date.day))
         if age > 25:
             raise ValueError("Youth accounts can only be opened by person aged 25 or younger")
             

@@ -41,7 +41,7 @@ class SavingAccount(BankAccount):
             self.balance -= amount
             
             if self.balance < 0:
-                charge = abs(amount) * Decimal("0.02")
+                charge = abs(self.balance) * Decimal("0.02")
                 self.balance -= charge
                 
             return amount
