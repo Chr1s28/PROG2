@@ -24,7 +24,7 @@ class SavingAccount(BankAccount):
     def apply_monthly_interest(self) -> None:
         """Apply the monthly interest to the account balance."""
         if self.opened:
-            interest = self.balance * self.interest_rate
+            interest = (self.balance * self.interest_rate).quantize(Decimal('0.01'))
             self.balance += interest
             
     def withdraw(self, amount: str | Decimal) -> Decimal:
