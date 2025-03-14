@@ -14,7 +14,28 @@ salt = b"$2b$12$lshujjHFpMf4uNenohn2tOjbvMkZeWzNniwEfeI0yjdCGqw29zvc."
 
 
 class ClientAccounts:
+    """
+    A class to manage multiple bank accounts for a client.
+    
+    This class provides functionality to create, manage, and interact with
+    different types of bank accounts (SavingAccount and YouthAccount).
+    
+    :ivar accounts: Dictionary storing all client accounts
+    :type accounts: dict
+    :ivar current_account: Reference to the currently selected account
+    :type current_account: BankAccount or None
+    :ivar console: Rich console for formatted output
+    :type console: Console
+    :ivar account_owners: Dictionary mapping account names to lists of owners
+    :type account_owners: dict
+    """
     def __init__(self):
+        """
+        Initialize a new ClientAccounts instance.
+        
+        Sets up the account management system and prompts for a password
+        that will be used for authentication.
+        """
         self.accounts = {}
         self.current_account = None
         self.console = Console()
@@ -24,10 +45,25 @@ class ClientAccounts:
         self.password_hash = bcrypt.hashpw(bytes(password, encoding="utf-8"), salt)
 
     def __check_password(self, password: str) -> bool:
+        """
+        Verify if the provided password matches the stored hash.
+        
+        :param password: The password to verify
+        :type password: str
+        :return: True if password matches, False otherwise
+        :rtype: bool
+        """
         return bcrypt.checkpw(bytes(password, encoding="utf-8"), self.password_hash)
 
     def __display_accounts(self):
-        """Display all accounts in a table format"""
+        """
+        Display all accounts in a table format.
+        
+        Creates a rich table showing account details including name,
+        type, IBAN, balance, status, and owners.
+        
+        :return: None
+        """
         if not self.accounts:
             print("[yellow]No accounts available.[/yellow]")
             return
@@ -50,7 +86,15 @@ class ClientAccounts:
         self.console.print(table)
 
     def __manage_account(self):
-        """Manage a selected account with various operations"""
+        """
+        Manage a selected account with various operations.
+        
+        Allows the user to perform operations on a selected account such as
+        deposit, withdraw, check balance, change interest rate, etc.
+        
+        :return: None
+        :raises ValueError: If operations fail due to account restrictions
+        """
         if not self.accounts:
             print("[red]No accounts available to manage.[/red]")
             return
@@ -129,7 +173,13 @@ class ClientAccounts:
                     break
 
     def __add_account_owner(self, account_name):
-        """Add an additional owner to an account"""
+        """
+        Add an additional owner to an account.
+        
+        :param account_name: The name of the account to add an owner to
+        :type account_name: str
+        :return: None
+        """
         new_owner = Prompt.ask("Enter name of additional owner")
 
         if account_name not in self.account_owners:
@@ -139,7 +189,15 @@ class ClientAccounts:
         print(f"[green]{new_owner} added as owner to account {account_name}[/green]")
 
     def __add_account(self):
-        """Add a new bank account"""
+        """
+        Add a new bank account.
+        
+        Creates either a SavingAccount or YouthAccount based on user input.
+        Generates a random IBAN and prompts for necessary information.
+        
+        :return: None
+        :raises ValueError: If account creation fails due to restrictions
+        """
         option = Prompt.ask("Which type of account?", choices=["Saving account", "Youth account"])
 
         iban = "CH" + "".join(random.choices(string.digits, k=18)) + random.choice(string.ascii_uppercase)
@@ -170,7 +228,14 @@ class ClientAccounts:
         self.accounts[name_option] = new_account
 
     def run(self) -> None:
-        """Run the bank application"""
+        """
+        Run the bank application.
+        
+        Main method that starts the application, handles authentication,
+        and provides the main menu for account management.
+        
+        :return: None
+        """
         password = Prompt.ask("Enter password", password=True)
         if self.__check_password(password):
             exit = False
