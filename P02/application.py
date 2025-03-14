@@ -30,12 +30,6 @@ class ClientAccounts:
     :type account_owners: dict
     """
     def __init__(self):
-        """
-        Initialize a new ClientAccounts instance.
-        
-        Sets up the account management system and prompts for a password
-        that will be used for authentication.
-        """
         self.accounts = {}
         self.current_account = None
         self.console = Console()
@@ -61,8 +55,6 @@ class ClientAccounts:
         
         Creates a rich table showing account details including name,
         type, IBAN, balance, status, and owners.
-        
-        :return: None
         """
         if not self.accounts:
             print("[yellow]No accounts available.[/yellow]")
@@ -92,7 +84,6 @@ class ClientAccounts:
         Allows the user to perform operations on a selected account such as
         deposit, withdraw, check balance, change interest rate, etc.
         
-        :return: None
         :raises ValueError: If operations fail due to account restrictions
         """
         if not self.accounts:
@@ -178,7 +169,6 @@ class ClientAccounts:
         
         :param account_name: The name of the account to add an owner to
         :type account_name: str
-        :return: None
         """
         new_owner = Prompt.ask("Enter name of additional owner")
 
@@ -195,7 +185,6 @@ class ClientAccounts:
         Creates either a SavingAccount or YouthAccount based on user input.
         Generates a random IBAN and prompts for necessary information.
         
-        :return: None
         :raises ValueError: If account creation fails due to restrictions
         """
         option = Prompt.ask("Which type of account?", choices=["Saving account", "Youth account"])
@@ -233,8 +222,6 @@ class ClientAccounts:
         
         Main method that starts the application, handles authentication,
         and provides the main menu for account management.
-        
-        :return: None
         """
         password = Prompt.ask("Enter password", password=True)
         if self.__check_password(password):
