@@ -11,14 +11,12 @@ class SavingAccount(BankAccount):
     """
     def __init__(self, iban: str, currency: str = "CHF"):
         super().__init__(iban, currency)
-        self.interest_rate = Decimal("0.001")  # 0.1% monthly interest
-        self.min_balance = Decimal("-100000")  # Allow negative balance
+        self.interest_rate = Decimal("0.001")
+        self.min_balance = Decimal("-100000")
         
     def set_interest_rate(self, rate: str | Decimal) -> None:
         """
         Change the monthly interest rate.
-        
-        :param rate: New interest rate as decimal (e.g., 0.001 for 0.1%)
         """
         if isinstance(rate, str):
             rate = Decimal(rate)
@@ -42,7 +40,6 @@ class SavingAccount(BankAccount):
         if self.balance - amount >= self.min_balance:
             self.balance -= amount
             
-            # Apply 2% charge if balance is below zero
             if self.balance < 0:
                 charge = abs(amount) * Decimal("0.02")
                 self.balance -= charge

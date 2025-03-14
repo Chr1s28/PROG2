@@ -1,29 +1,21 @@
 from decimal import Decimal
 from datetime import datetime, date
-from P02.bank_account import BankAccount
+from bank_account import BankAccount
 
 class YouthAccount(BankAccount):
     """
     A youth account that extends BankAccount with higher interest rate,
-    age restriction, and monthly withdrawal limit.
+    age restriction and monthly withdrawal limit.
     """
     def __init__(self, iban: str, birth_date: date, currency: str = "CHF"):
         """
         Initialize a youth account with age verification.
-        
-        :param iban: The IBAN of the account
-        :param birth_date: The birth date of the account holder
-        :param currency: The currency of the account (default: CHF)
-        :raises ValueError: If the account holder is older than 25 years
         """
         super().__init__(iban, currency)
         
-        # Verify age restriction (25 years or below)
-        today = datetime.now().date()
-        age = today.year - birth_date.year - ((today.month, today.day) < (birth_date.month, birth_date.day))
-        
+        age =  datetime.now().year - birth_date.year
         if age > 25:
-            raise ValueError("Youth accounts can only be opened by individuals aged 25 or younger")
+            raise ValueError("Youth accounts can only be opened by person aged 25 or younger")
             
         self.birth_date = birth_date
         self.interest_rate = Decimal("0.02")  # 2% monthly interest
@@ -34,8 +26,6 @@ class YouthAccount(BankAccount):
     def set_interest_rate(self, rate: str | Decimal) -> None:
         """
         Change the monthly interest rate.
-        
-        :param rate: New interest rate as decimal (e.g., 0.02 for 2%)
         """
         if isinstance(rate, str):
             rate = Decimal(rate)
@@ -52,24 +42,17 @@ class YouthAccount(BankAccount):
     def withdraw(self, amount: str | Decimal) -> Decimal:
         """
         Withdraw an amount from the account with monthly limit check.
-        
-        :param amount: The amount to withdraw
-        :return: The withdrawn amount
-        :raises ValueError: If the withdrawal exceeds the monthly limit
         """
         amount = self._BankAccount__validate_transaction(amount)
         
-        # Reset monthly withdrawal counter if we're in a new month
         current_month = datetime.now().month
         if current_month != self.last_withdraw_month:
             self.withdraw_this_month = Decimal("0")
             self.last_withdraw_month = current_month
             
-        # Check if withdrawal would exceed monthly limit
         if self.withdraw_this_month + amount > self.monthly_withdraw_limit:
             raise ValueError(f"Monthly withdrawal limit of {self.monthly_withdraw_limit} {self.currency} exceeded")
             
-        # Proceed with withdrawal if balance allows
         if self.balance - amount >= self.min_balance:
             self.balance -= amount
             self.withdraw_this_month += amount

@@ -16,7 +16,7 @@ class BankAccount:
     
     def __validate_transaction(self, amount: str | Decimal) -> Decimal:
         if self.opened:
-            if type(amount) is str:
+            if isinstance(amount, str):
                 amount = Decimal(amount)
             if amount <= 0:
                 raise ValueError("amount needs to be non-zero, positive number")
