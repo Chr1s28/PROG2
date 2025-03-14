@@ -7,6 +7,7 @@ from youth_account import YouthAccount
 class BankSimulation:
     """
     A simulation class to demonstrate the two types of bank accounts over time.
+    Note: uses package freezegun to mock current datetime
     """
     def __init__(self):
         self.saving_account = SavingAccount("CH9876543210")
@@ -22,8 +23,8 @@ class BankSimulation:
     def print_account_status(self):
         """Print the current status of all accounts."""
         print(f"=== Account Status at {self.current_date.strftime('%Y-%m-%d')} ===")
-        print(f"Saving Account: {self.saving_account.balance} {self.saving_account.currency}")
-        print(f"Youth Account: {self.youth_account.balance} {self.youth_account.currency}")
+        print(f"Saving Account: {self.saving_account.balance:.2f} {self.saving_account.currency}")
+        print(f"Youth Account: {self.youth_account.balance:.2f} {self.youth_account.currency}")
         
     def simulate_month(self):
         """Simulate the passage of one month."""
@@ -81,7 +82,7 @@ class BankSimulation:
         # Month 5
         with freeze_time(self.current_date):
             self.simulate_month()
-            print("\nSimulation complete. Final account status:")
+            print("Simulation complete. Final account status:")
             self.print_account_status()
 
 
