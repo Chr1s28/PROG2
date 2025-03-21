@@ -11,6 +11,7 @@ from rich.table import Table as RichTable
 
 from .saving_account import SavingAccount
 from .youth_account import YouthAccount
+from .tax_report import TaxReport
 
 
 class ClientAccounts:
@@ -53,7 +54,7 @@ class ClientAccounts:
 
         return bcrypt.checkpw(bytes(password, encoding="utf-8"), self.password_hash)
 
-    def __display_accounts(self) -> None:
+    def display_accounts(self) -> None:
         """
         Display all accounts in a table format.
 
@@ -65,7 +66,7 @@ class ClientAccounts:
             print("[yellow]No accounts available.[/yellow]")
             return
 
-        table = RichTable(title="Your Accounts")
+        table = RichTable(title="Account Overview", title_justify="left")
         table.add_column("Account Name")
         table.add_column("Account Type")
         table.add_column("IBAN")
@@ -96,7 +97,7 @@ class ClientAccounts:
             print("[red]No accounts available to manage.[/red]")
             return
 
-        self.__display_accounts()
+        self.display_accounts()
         account_name = Prompt.ask("Choose an account", choices=list(self.accounts.keys()))
         self.current_account = self.accounts[account_name]
 
@@ -247,7 +248,7 @@ class ClientAccounts:
                 print("You have no accounts yet")
 
             option = Prompt.ask(
-                "What would you like to do", choices=["Manage account", "Add account", "List accounts", "Exit"]
+                "What would you like to do", choices=["Manage account", "Add account", "List accounts", "Tax report", "Exit"]
             )
 
             match option:
@@ -256,7 +257,9 @@ class ClientAccounts:
                 case "Add account":
                     self.__add_account()
                 case "List accounts":
-                    self.__display_accounts()
+                    self.display_accounts()
+                case "Tax report":
+                    TaxReport.generate(self)
                 case "Exit":
                     exit = True
 
