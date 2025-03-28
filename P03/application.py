@@ -6,9 +6,9 @@ from typing import Dict, List, Union
 import bcrypt
 from rich import print
 from rich.console import Console
-from rich.prompt import Prompt
 from rich.table import Table as RichTable
 
+from .numbered_prompt import NumberedPrompt
 from .saving_account import SavingAccount
 from .youth_account import YouthAccount
 from .tax_report import TaxReport
@@ -37,7 +37,7 @@ class ClientAccounts:
         self.console: Console = Console()
         self.account_owners: Dict[str, List[str]] = {}
 
-        password: str = Prompt.ask("Set password", password=True)
+        password: str = NumberedPrompt.ask("Set password", password=True)
         self.password_hash: bytes = bcrypt.hashpw(
             bytes(password, encoding="utf-8"), b"$2b$12$lshujjHFpMf4uNenohn2tOjbvMkZeWzNniwEfeI0yjdCGqw29zvc."
         )
@@ -98,7 +98,7 @@ class ClientAccounts:
             return
 
         self.display_accounts()
-        account_name = Prompt.ask("Choose an account", choices=list(self.accounts.keys()))
+        account_name = NumberedPrompt.ask("Choose an account", choices=list(self.accounts.keys()))
         self.current_account = self.accounts[account_name]
 
         while True:
@@ -115,12 +115,12 @@ class ClientAccounts:
             options.append("Add Owner")
             options.append("Back to Main Menu")
 
-            action = Prompt.ask("What would you like to do", choices=options)
+            action = NumberedPrompt.ask("What would you like to do", choices=options)
 
             match action:
                 case "Deposit":
                     try:
-                        amount = Prompt.ask("Enter amount to deposit")
+                        amount = NumberedPrompt.ask("Enter amount to deposit")
                         self.current_account.deposit(amount)
                         print(f"[green]Successfully deposited {amount} {self.current_account.currency}[/green]")
                     except ValueError as e:
@@ -128,7 +128,7 @@ class ClientAccounts:
 
                 case "Withdraw":
                     try:
-                        amount = Prompt.ask("Enter amount to withdraw")
+                        amount = NumberedPrompt.ask("Enter amount to withdraw")
                         self.current_account.withdraw(amount)
                         print(f"[green]Successfully withdrew {amount} {self.current_account.currency}[/green]")
                     except ValueError as e:
@@ -141,7 +141,7 @@ class ClientAccounts:
 
                 case "Change interest Rate":
                     try:
-                        new_rate = Prompt.ask("Enter new interest rate (e.g., 0.01 for 1%)")
+                        new_rate = NumberedPrompt.ask("Enter new interest rate (e.g., 0.01 for 1%)")
                         self.current_account.set_interest_rate(new_rate)
                         print(f"[green]Interest rate changed to {self.current_account.interest_rate}[/green]")
                     except ValueError as e:
@@ -154,7 +154,7 @@ class ClientAccounts:
                     )
 
                 case "Close account":
-                    confirm = Prompt.ask("Are you sure you want to close this account?", choices=["yes", "no"])
+                    confirm = NumberedPrompt.ask("Are you sure you want to close this account?", choices=["yes", "no"])
                     if confirm == "yes":
                         self.current_account.close()
                         print(f"[yellow]Account {account_name} has been closed.[/yellow]")
@@ -178,7 +178,7 @@ class ClientAccounts:
         :type account_name: str
         """
 
-        new_owner = Prompt.ask("Enter name of additional owner")
+        new_owner = NumberedPrompt.ask("Enter name of additional owner")
 
         if account_name not in self.account_owners:
             self.account_owners[account_name] = ["Primary Owner"]
@@ -196,7 +196,7 @@ class ClientAccounts:
         :raises ValueError: If account creation fails due to restrictions
         """
 
-        option = Prompt.ask("Which type of account?", choices=["Saving account", "Youth account"])
+        option = NumberedPrompt.ask("Which type of account?", choices=["Saving account", "Youth account"])
 
         iban = "CH" + "".join(random.choices(string.digits, k=18)) + random.choice(string.ascii_uppercase)
 
@@ -206,9 +206,9 @@ class ClientAccounts:
                 print("[green]Saving account created successfully[/green]")
 
             case "Youth account":
-                year = int(Prompt.ask("Enter birth year"))
-                month = int(Prompt.ask("Enter birth month (1-12)"))
-                day = int(Prompt.ask("Enter birth day (1-31)"))
+                year = int(NumberedPrompt.ask("Enter birth year"))
+                month = int(NumberedPrompt.ask("Enter birth month (1-12)"))
+                day = int(NumberedPrompt.ask("Enter birth day (1-31)"))
 
                 try:
                     birth_date = date(year, month, day)
@@ -218,7 +218,7 @@ class ClientAccounts:
                     print(f"[red]Error creating youth account: {e}[/red]")
                     return
 
-        name_option = Prompt.ask("Name of account")
+        name_option = NumberedPrompt.ask("Name of account")
         if name_option in self.accounts:
             print("[red]An account with this name already exists. Please choose a different name.[/red]")
             return
@@ -233,7 +233,7 @@ class ClientAccounts:
         and provides the main menu for account management.
         """
 
-        password = Prompt.ask("Enter password", password=True)
+        password = NumberedPrompt.ask("Enter password", password=True)
         if self.__check_password(password):
             exit = False
         else:
@@ -247,7 +247,7 @@ class ClientAccounts:
             else:
                 print("You have no accounts yet")
 
-            option = Prompt.ask(
+            option = NumberedPrompt.ask(
                 "What would you like to do", choices=["Manage account", "Add account", "List accounts", "Tax report", "Exit"]
             )
 
