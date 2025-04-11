@@ -45,11 +45,10 @@ class DatasetDownloader:
         response = self.session.get(self.url, stream=True)
         response.raise_for_status()
         
-        # Check if response was from cache
         if getattr(response, 'from_cache', False) and not force:
-            print(f"Using cached response (no download needed)")
+            print("Using cached response (no download needed)")
         else:
-            print(f"Downloading fresh data")
+            print("Downloading fresh data")
             with open(self.local_filename, 'wb') as f:
                 for chunk in response.iter_content(chunk_size=8192):
                     f.write(chunk)
@@ -69,6 +68,7 @@ class DatasetDownloader:
         filename = self.download(force=force_download)
         return pd.read_parquet(filename)
 
-
-# Example URL for Zurich traffic accident locations
 url = "https://data.stadt-zuerich.ch/dataset/sid_dav_strassenverkehrsunfallorte/download/RoadTrafficAccidentLocations.parquet"
+
+downloader = DatasetDownloader(url)
+dataset = downloader.load_as_dataframe()
