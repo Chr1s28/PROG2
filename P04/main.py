@@ -128,17 +128,25 @@ class AccidentDataProcessor:
             print(f"{severity_name}: {count} accidents ({severity_percentages[severity]}%)")
         
         # Vehicle involvement
-        vehicle_stats = {
-            'Pedestrian': (data['AccidentInvolvingPedestrian'] == 'true').sum(),
-            'Bicycle': (data['AccidentInvolvingBicycle'] == 'true').sum(),
-            'Motorcycle': (data['AccidentInvolvingMotorcycle'] == 'true').sum()
+        vehicle_columns = {
+            'Pedestrian': 'AccidentInvolvingPedestrian',
+            'Bicycle': 'AccidentInvolvingBicycle',
+            'Motorcycle': 'AccidentInvolvingMotorcycle'
         }
-        stats['vehicle_involvement'] = vehicle_stats
         
+        vehicle_stats = {}
         print("\n----- Vehicle Involvement -----")
-        for vehicle, count in vehicle_stats.items():
+        
+        for vehicle_type, column in vehicle_columns.items():
+            # Count occurrences where the column value is 'true'
+            count = sum(1 for value in data[column] if value == 'true')
+            vehicle_stats[vehicle_type] = count
+            
+            # Calculate percentage
             percentage = round(count / stats['total_accidents'] * 100, 1)
-            print(f"Accidents involving {vehicle}: {count} ({percentage}%)")
+            print(f"Accidents involving {vehicle_type}: {count} ({percentage}%)")
+        
+        stats['vehicle_involvement'] = vehicle_stats
         
         # Temporal analysis
         year_counts = data['AccidentYear'].value_counts().sort_index()
