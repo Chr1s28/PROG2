@@ -2,12 +2,9 @@ import os
 import requests_cache
 import pandas as pd
 import re
-import numpy as np
-import plotly.express as px
 import plotly.graph_objects as go
 from pyproj import Transformer
 from datetime import timedelta
-from collections import Counter
 
 class DatasetDownloader:
     """
@@ -138,11 +135,9 @@ class AccidentDataProcessor:
         print("\n----- Vehicle Involvement -----")
         
         for vehicle_type, column in vehicle_columns.items():
-            # Count occurrences where the column value is 'true'
-            count = sum(1 for value in data[column] if value == 'true')
+            count = sum(1 for value in data[column] if value is True)
             vehicle_stats[vehicle_type] = count
             
-            # Calculate percentage
             percentage = round(count / stats['total_accidents'] * 100, 1)
             print(f"Accidents involving {vehicle_type}: {count} ({percentage}%)")
         
