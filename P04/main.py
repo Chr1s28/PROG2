@@ -2,10 +2,12 @@ import os
 import requests_cache
 import pandas as pd
 import re
+import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 from pyproj import Transformer
 from datetime import timedelta
+from collections import Counter
 
 class DatasetDownloader:
     """
@@ -121,6 +123,133 @@ class AccidentDataProcessor:
             self.remove_language_columns()
         return self.processed_data
     
+    def calculate_statistics(self):
+        """
+        Calculate and print various statistics about the accident dataset.
+        
+        This includes:
+        - Basic counts and distributions
+        - Temporal patterns (yearly, monthly, daily, hourly)
+        - Accident types and severity
+        - Vehicle involvement statistics
+        
+        :return: Dictionary containing the calculated statistics
+        :rtype: dict
+        """
+        if self.processed_data is None:
+            self.remove_language_columns()
+        
+        data = self.processed_data
+        stats = {}
+        
+        # Basic dataset statistics
+        stats['total_accidents'] = len(data)
+        print(f"\n===== ACCIDENT DATASET STATISTICS =====")
+        print(f"Total number of accidents: {stats['total_accidents']}")
+        
+        # Accident severity distribution
+        severity_counts = data['AccidentSeverityCategory'].value_counts()
+        severity_percentages = (severity_counts / stats['total_accidents'] * 100).round(1)
+        stats['severity_distribution'] = severity_counts.to_dict()
+        
+        print("\n----- Accident Severity Distribution -----")
+        for severity, count in severity_counts.items():
+            severity_name = data[data['AccidentSeverityCategory'] == severity]['AccidentSeverityCategory_en'].iloc[0]
+            print(f"{severity} ({severity_name}): {count} accidents ({severity_percentages[severity]}%)")
+        
+        # Vehicle involvement
+        vehicle_stats = {
+            'Pedestrian': data['AccidentInvolvingPedestrian'].value_counts().get('true', 0),
+            'Bicycle': data['AccidentInvolvingBicycle'].value_counts().get('true', 0),
+            'Motorcycle': data['AccidentInvolvingMotorcycle'].value_counts().get('true', 0)
+        }
+        stats['vehicle_involvement'] = vehicle_stats
+        
+        print("\n----- Vehicle Involvement -----")
+        for vehicle, count in vehicle_stats.items():
+            percentage = (count / stats['total_accidents'] * 100).round(1)
+            print(f"Accidents involving {vehicle}: {count} ({percentage}%)")
+        
+        # Temporal analysis
+        if 'AccidentYear' in data.columns:
+            year_counts = data['AccidentYear'].value_counts().sort_index()
+            stats['yearly_distribution'] = year_counts.to_dict()
+            
+            print("\n----- Yearly Distribution -----")
+            for year, count in year_counts.items():
+                print(f"Year {year}: {count} accidents")
+        
+        if 'AccidentMonth' in data.columns:
+            month_counts = data['AccidentMonth'].value_counts().sort_index()
+            stats['monthly_distribution'] = month_counts.to_dict()
+            
+            print("\n----- Monthly Distribution -----")
+            for month, count in month_counts.items():
+                month_name = data[data['AccidentMonth'] == month]['AccidentMonth_en'].iloc[0]
+                print(f"Month {month} ({month_name}): {count} accidents")
+        
+        if 'AccidentWeekDay' in data.columns:
+            weekday_counts = data['AccidentWeekDay'].value_counts()
+            stats['weekday_distribution'] = weekday_counts.to_dict()
+            
+            print("\n----- Weekday Distribution -----")
+            for weekday, count in weekday_counts.items():
+                weekday_name = data[data['AccidentWeekDay'] == weekday]['AccidentWeekDay_en'].iloc[0]
+                print(f"{weekday} ({weekday_name}): {count} accidents")
+        
+        if 'AccidentHour' in data.columns:
+            # Convert to numeric for statistical calculations
+            hour_numeric = pd.to_numeric(data['AccidentHour'], errors='coerce')
+            
+            hour_stats = {
+                'mean': hour_numeric.mean().round(2),
+                'median': hour_numeric.median(),
+                'std': hour_numeric.std().round(2),
+                'min': hour_numeric.min(),
+                'max': hour_numeric.max()
+            }
+            stats['hour_statistics'] = hour_stats
+            
+            print("\n----- Accident Hour Statistics -----")
+            print(f"Mean hour: {hour_stats['mean']}")
+            print(f"Median hour: {hour_stats['median']}")
+            print(f"Standard deviation: {hour_stats['std']}")
+            print(f"Hour range: {hour_stats['min']} - {hour_stats['max']}")
+            
+            # Hour distribution
+            hour_counts = data['AccidentHour'].value_counts().sort_index()
+            stats['hourly_distribution'] = hour_counts.to_dict()
+            
+            print("\n----- Hourly Distribution -----")
+            for hour, count in hour_counts.items():
+                print(f"Hour {hour}: {count} accidents")
+        
+        # Road type analysis
+        if 'RoadType' in data.columns:
+            road_counts = data['RoadType'].value_counts()
+            stats['road_type_distribution'] = road_counts.to_dict()
+            
+            print("\n----- Road Type Distribution -----")
+            for road_type, count in road_counts.head(5).items():
+                road_name = data[data['RoadType'] == road_type]['RoadType_en'].iloc[0]
+                percentage = (count / stats['total_accidents'] * 100).round(1)
+                print(f"{road_type} ({road_name}): {count} accidents ({percentage}%)")
+            
+            if len(road_counts) > 5:
+                print(f"... and {len(road_counts) - 5} more road types")
+        
+        # Canton/Municipality analysis
+        if 'CantonCode' in data.columns:
+            canton_counts = data['CantonCode'].value_counts()
+            stats['canton_distribution'] = canton_counts.to_dict()
+            
+            print("\n----- Canton Distribution -----")
+            for canton, count in canton_counts.items():
+                percentage = (count / stats['total_accidents'] * 100).round(1)
+                print(f"Canton {canton}: {count} accidents ({percentage}%)")
+        
+        return stats
+    
     def visualize_data(self, viz_type='scatter'):
         """
         Visualize accident locations on an interactive map using Plotly.
@@ -205,6 +334,9 @@ raw_dataset = downloader.load_as_dataframe()
 # Process the dataset
 processor = AccidentDataProcessor(raw_dataset)
 clean_dataset = processor.remove_language_columns()
+
+# Calculate and print statistics
+processor.calculate_statistics()
 
 # Visualize the data as scatter points
 print("Generating scatter map...")
