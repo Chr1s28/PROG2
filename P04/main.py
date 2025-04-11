@@ -1,10 +1,11 @@
 import os
-import requests_cache
+import time
+import requests
 import pandas as pd
 import re
 import plotly.graph_objects as go
 from pyproj import Transformer
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 class DatasetDownloader:
     """
@@ -23,41 +24,64 @@ class DatasetDownloader:
         """
         self.url = url
         self.local_filename = os.path.basename(url)
-        
-        # Initialize the cached session
-        self.session = requests_cache.CachedSession(
-            'dataset_cache',  # Cache name/file
-            expire_after=timedelta(seconds=cache_seconds),
-            allowable_methods=('GET', 'POST')
-        )
+        self.cache_seconds = cache_seconds
     
     def download(self, force=False):
         """
-        Download the dataset using cache if available.
+        Download the dataset using file-based caching.
         
         :param force: Force download even if cached version exists
         :type force: bool
         :return: Path to the downloaded file
         :rtype: str
         """
-        if force:
-            # Clear the cache for this URL if forcing download
-            self.session.cache.delete_url(self.url)
-            
-        print(f"Requesting dataset from {self.url}")
-        response = self.session.get(self.url, stream=True)
-        response.raise_for_status()
+        # Check if file exists and is recent enough
+        should_download = force or not self._is_cache_valid()
         
-        if getattr(response, 'from_cache', False) and not force:
-            print("Using cached response (no download needed)")
-        else:
-            print("Downloading fresh data")
+        if should_download:
+            print(f"Downloading dataset from {self.url}")
+            response = requests.get(self.url, stream=True)
+            response.raise_for_status()
+            
             with open(self.local_filename, 'wb') as f:
                 for chunk in response.iter_content(chunk_size=8192):
                     f.write(chunk)
             print(f"Download completed: {self.local_filename}")
+        else:
+            print(f"Using cached file: {self.local_filename} (last modified: {self._get_file_age_str()})")
             
         return self.local_filename
+    
+    def _is_cache_valid(self):
+        """
+        Check if the cached file exists and is recent enough.
+        
+        :return: True if cache is valid, False otherwise
+        :rtype: bool
+        """
+        if not os.path.exists(self.local_filename):
+            return False
+            
+        # Get file modification time
+        file_mtime = os.stat(self.local_filename).st_mtime
+        current_time = time.time()
+        
+        # Check if file is recent enough
+        return (current_time - file_mtime) < self.cache_seconds
+    
+    def _get_file_age_str(self):
+        """
+        Get a human-readable string of when the file was last modified.
+        
+        :return: String representation of file age
+        :rtype: str
+        """
+        if not os.path.exists(self.local_filename):
+            return "file does not exist"
+            
+        file_mtime = os.stat(self.local_filename).st_mtime
+        mtime_dt = datetime.fromtimestamp(file_mtime)
+        return mtime_dt.strftime("%Y-%m-%d %H:%M:%S")
     
     def load_as_dataframe(self, force_download=False):
         """
