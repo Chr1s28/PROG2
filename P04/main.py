@@ -150,38 +150,27 @@ class AccidentDataProcessor:
         fig = go.Figure()
         
         if viz_type.lower() == 'scatter':
-            # Create a color mapping for accident severity categories
-            severity_categories = viz_data['AccidentSeverityCategory'].unique()
-            severity_map = {cat: i for i, cat in enumerate(severity_categories)}
-            
-            # Map categorical values to numeric values
-            color_values = viz_data['AccidentSeverityCategory'].map(severity_map)
-            
-            # Add scatter plot
-            fig.add_trace(go.Scattermapbox(
-                lat=viz_data['latitude'],
-                lon=viz_data['longitude'],
-                mode='markers',
-                marker=dict(
-                    size=4,
-                    color=color_values,
-                    colorscale='Viridis',
-                    showscale=True,
-                    colorbar=dict(
-                        title="Accident Severity",
-                        tickvals=list(severity_map.values()),
-                        ticktext=list(severity_map.keys())
-                    )
-                ),
-                hoverinfo='text'
-            ))
+            # Add scatter plot with discrete colors for each severity category
+            for severity in viz_data['AccidentSeverityCategory'].unique():
+                # Filter data for this severity
+                category_data = viz_data[viz_data['AccidentSeverityCategory'] == severity]
+                
+                # Add a trace for this severity category
+                fig.add_trace(go.Scattermapbox(
+                    lat=category_data['latitude'],
+                    lon=category_data['longitude'],
+                    mode='markers',
+                    marker=dict(size=4),
+                    name=severity,
+                    hoverinfo='text'
+                ))
             
         elif viz_type.lower() == 'heatmap':
-            # Add heatmap
+            # Add heatmap with array of ones for z values
             fig.add_trace(go.Densitymapbox(
                 lat=viz_data['latitude'],
                 lon=viz_data['longitude'],
-                z=1,  # Uniform weight for each point
+                z=[1] * len(viz_data),  # Array of ones with same length as data
                 radius=10,
                 colorscale='Hot',
                 hoverinfo='none'
