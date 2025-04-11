@@ -124,7 +124,6 @@ class AccidentDataProcessor:
             severity_name = data[data['AccidentSeverityCategory'] == severity]['AccidentSeverityCategory_en'].iloc[0]
             print(f"{severity_name}: {count} accidents ({severity_percentages[severity]}%)")
         
-        # Vehicle involvement
         vehicle_columns = {
             'Pedestrian': 'AccidentInvolvingPedestrian',
             'Bicycle': 'AccidentInvolvingBicycle',
@@ -143,7 +142,6 @@ class AccidentDataProcessor:
         
         stats['vehicle_involvement'] = vehicle_stats
         
-        # Temporal analysis
         year_counts = data['AccidentYear'].value_counts().sort_index()
         stats['yearly_distribution'] = year_counts.to_dict()
         
@@ -167,23 +165,22 @@ class AccidentDataProcessor:
         }
         stats['hour_statistics'] = hour_stats
         
-        print("\n----- Accident Hour Statistics -----")
+        print("\n----- Accident Hours -----")
         print(f"Mean hour: {hour_stats['mean']}")
         print(f"Median hour: {hour_stats['median']}")
         
-        # Road type analysis
         road_counts = data['RoadType'].value_counts()
         stats['road_type_distribution'] = road_counts.to_dict()
         
-        print("\n----- Road Type Distribution -----")
+        print("\n----- Road Types -----")
         for road_type, count in road_counts.head(5).items():
             road_name = data[data['RoadType'] == road_type]['RoadType_en'].iloc[0]
             percentage = round(count / stats['total_accidents'] * 100, 1)
             print(f"{road_name}: {count} accidents ({percentage}%)")
         
-    def visualize_data(self, viz_type='scatter'):
+    def visualize_data(self, viz_type):
         """
-        Visualize accident locations on an interactive map using Plotly.
+        Visualize accident locations with Plotly.
         
         :param viz_type: Type of visualization ('scatter' or 'heatmap')
         :type viz_type: str
