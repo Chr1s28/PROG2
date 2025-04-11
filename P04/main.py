@@ -1,6 +1,7 @@
 import os
 import requests_cache
 import pandas as pd
+import re
 from datetime import timedelta
 
 class DatasetDownloader:
@@ -68,7 +69,76 @@ class DatasetDownloader:
         filename = self.download(force=force_download)
         return pd.read_parquet(filename)
 
+class AccidentDataProcessor:
+    """
+    A class to preprocess and visualize the road traffic accident dataset.
+    """
+    
+    def __init__(self, dataframe):
+        """
+        Initialize the processor with a pandas DataFrame.
+        
+        :param dataframe: The accident dataset
+        :type dataframe: pandas.DataFrame
+        """
+        self.raw_data = dataframe
+        self.processed_data = None
+    
+    def remove_language_columns(self):
+        """
+        Remove columns with language-specific suffixes (_de, _fr, _it).
+        Keep only the base columns and English (_en) translations.
+        
+        :return: DataFrame with language columns removed
+        :rtype: pandas.DataFrame
+        """
+        # Get all column names
+        all_columns = self.raw_data.columns.tolist()
+        
+        # Identify columns to keep (no language suffix or _en suffix)
+        columns_to_keep = []
+        for col in all_columns:
+            # Keep if it doesn't end with _de, _fr, or _it
+            if not re.search(r'_(de|fr|it)$', col):
+                columns_to_keep.append(col)
+        
+        # Create a new DataFrame with only the selected columns
+        self.processed_data = self.raw_data[columns_to_keep].copy()
+        return self.processed_data
+    
+    def get_processed_data(self):
+        """
+        Get the processed DataFrame. If processing hasn't been done yet,
+        perform the default processing steps first.
+        
+        :return: Processed DataFrame
+        :rtype: pandas.DataFrame
+        """
+        if self.processed_data is None:
+            self.remove_language_columns()
+        return self.processed_data
+    
+    def visualize_data(self):
+        """
+        Placeholder for future visualization functionality.
+        """
+        print("Visualization functionality will be implemented in the future.")
+        # Future implementation will include various charts and maps
+
+
+# Example usage
 url = "https://data.stadt-zuerich.ch/dataset/sid_dav_strassenverkehrsunfallorte/download/RoadTrafficAccidentLocations.parquet"
 
 downloader = DatasetDownloader(url)
-dataset = downloader.load_as_dataframe()
+raw_dataset = downloader.load_as_dataframe()
+
+# Process the dataset
+processor = AccidentDataProcessor(raw_dataset)
+clean_dataset = processor.remove_language_columns()
+
+# Display information about the processed dataset
+print(f"Original dataset shape: {raw_dataset.shape}")
+print(f"Processed dataset shape: {clean_dataset.shape}")
+print("\nColumns in processed dataset:")
+for col in clean_dataset.columns:
+    print(f"- {col}")
