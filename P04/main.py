@@ -178,7 +178,6 @@ class AccidentDataProcessor:
         
         # Update layout
         fig.update_layout(
-            mapmode="maplibre",
             maplibre=dict(
                 style='open-street-map',
                 center=dict(
