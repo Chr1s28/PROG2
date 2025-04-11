@@ -178,7 +178,8 @@ class AccidentDataProcessor:
         
         # Update layout
         fig.update_layout(
-            maplibre=dict(
+            mapmode="maplibre",
+            mapbox=dict(
                 style='open-street-map',
                 center=dict(
                     lat=viz_data['latitude'].mean(),
