@@ -1,84 +1,72 @@
 import os
-import time
-import requests
+import requests_cache
 import pandas as pd
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 class DatasetDownloader:
     """
-    A class to download datasets with a timeout functionality to prevent
+    A class to download datasets with caching functionality to prevent
     multiple downloads within a specified time period.
     """
     
-    def __init__(self, url, timeout_seconds=10):
+    def __init__(self, url, cache_seconds=10):
         """
-        Initialize the DatasetDownloader with a URL and timeout period.
+        Initialize the DatasetDownloader with a URL and cache period.
         
         :param url: The URL of the dataset to download
         :type url: str
-        :param timeout_seconds: Minimum seconds between downloads
-        :type timeout_seconds: int
+        :param cache_seconds: Seconds to keep responses in cache
+        :type cache_seconds: int
         """
         self.url = url
-        self.timeout_seconds = timeout_seconds
-        self.last_download_time = None
         self.local_filename = os.path.basename(url)
-    
-    def _can_download(self):
-        """
-        Check if enough time has passed since the last download.
         
-        :return: True if download is allowed, False otherwise
-        :rtype: bool
-        """
-        if self.last_download_time is None:
-            return True
-            
-        elapsed_time = datetime.now() - self.last_download_time
-        return elapsed_time.total_seconds() >= self.timeout_seconds
+        # Initialize the cached session
+        self.session = requests_cache.CachedSession(
+            'dataset_cache',  # Cache name/file
+            expire_after=timedelta(seconds=cache_seconds),
+            allowable_methods=('GET', 'POST')
+        )
     
     def download(self, force=False):
         """
-        Download the dataset if the timeout period has passed.
+        Download the dataset using cache if available.
         
-        :param force: Force download even if timeout hasn't passed
+        :param force: Force download even if cached version exists
         :type force: bool
-        :return: Path to the downloaded file or None if download was skipped
-        :rtype: str or None
+        :return: Path to the downloaded file
+        :rtype: str
         """
-        if not force and not self._can_download():
-            remaining = self.timeout_seconds - (datetime.now() - self.last_download_time).total_seconds()
-            print(f"Download timeout in effect. Try again in {remaining:.1f} seconds or use force=True.")
-            return None
+        if force:
+            # Clear the cache for this URL if forcing download
+            self.session.cache.delete_url(self.url)
             
-        print(f"Downloading dataset from {self.url}")
-        response = requests.get(self.url, stream=True)
+        print(f"Requesting dataset from {self.url}")
+        response = self.session.get(self.url, stream=True)
         response.raise_for_status()
         
-        with open(self.local_filename, 'wb') as f:
-            for chunk in response.iter_content(chunk_size=8192):
-                f.write(chunk)
-                
-        self.last_download_time = datetime.now()
-        print(f"Download completed: {self.local_filename}")
+        # Check if response was from cache
+        if getattr(response, 'from_cache', False) and not force:
+            print(f"Using cached response (no download needed)")
+        else:
+            print(f"Downloading fresh data")
+            with open(self.local_filename, 'wb') as f:
+                for chunk in response.iter_content(chunk_size=8192):
+                    f.write(chunk)
+            print(f"Download completed: {self.local_filename}")
+            
         return self.local_filename
     
     def load_as_dataframe(self, force_download=False):
         """
         Download the dataset and load it as a pandas DataFrame.
         
-        :param force_download: Force download even if timeout hasn't passed
+        :param force_download: Force download even if cached version exists
         :type force_download: bool
-        :return: DataFrame containing the dataset or None if download was skipped
-        :rtype: pandas.DataFrame or None
+        :return: DataFrame containing the dataset
+        :rtype: pandas.DataFrame
         """
         filename = self.download(force=force_download)
-        if filename is None:
-            if os.path.exists(self.local_filename):
-                print(f"Using existing file: {self.local_filename}")
-                return pd.read_parquet(self.local_filename)
-            return None
-            
         return pd.read_parquet(filename)
 
 
