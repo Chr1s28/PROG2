@@ -45,12 +45,11 @@ class DatasetDownloader:
         
         # Download the file
         print(f"Downloading dataset from {self.url}")
-        response = requests.get(self.url, stream=True)
+        response = requests.get(self.url)
         response.raise_for_status()
         
         with open(self.local_filename, 'wb') as f:
-            for chunk in response.iter_content(chunk_size=8192):
-                f.write(chunk)
+            f.write(response.content)
         print(f"Download completed: {self.local_filename}")
         
         return pd.read_parquet(self.local_filename)
