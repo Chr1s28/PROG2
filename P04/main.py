@@ -2,6 +2,8 @@ import os
 import requests_cache
 import pandas as pd
 import re
+import plotly.express as px
+from pyproj import Transformer
 from datetime import timedelta
 
 class DatasetDownloader:
@@ -118,12 +120,86 @@ class AccidentDataProcessor:
             self.remove_language_columns()
         return self.processed_data
     
-    def visualize_data(self):
+    def visualize_data(self, map_type='open-street-map', zoom=11):
         """
-        Placeholder for future visualization functionality.
+        Visualize accident locations on an interactive map using Plotly.
+        
+        :param map_type: Type of map to display ('open-street-map', 'carto-positron', etc.)
+        :type map_type: str
+        :param zoom: Initial zoom level for the map
+        :type zoom: int
+        :return: Plotly figure object
+        :rtype: plotly.graph_objects.Figure
         """
-        print("Visualization functionality will be implemented in the future.")
-        # Future implementation will include various charts and maps
+        # Make sure we have processed data
+        if self.processed_data is None:
+            self.remove_language_columns()
+        
+        # Create a copy of the data for visualization
+        viz_data = self.processed_data.copy()
+        
+        # Convert Swiss coordinates (CHLV95) to WGS84 (latitude/longitude)
+        transformer = Transformer.from_crs("EPSG:2056", "EPSG:4326", always_xy=True)
+        
+        # Apply the transformation to each row
+        coordinates = [
+            transformer.transform(row.AccidentLocation_CHLV95_E, row.AccidentLocation_CHLV95_N) 
+            for _, row in viz_data.iterrows()
+        ]
+        
+        # Add latitude and longitude columns
+        viz_data['longitude'] = [coord[0] for coord in coordinates]
+        viz_data['latitude'] = [coord[1] for coord in coordinates]
+        
+        # Create hover text with accident details
+        viz_data['hover_text'] = viz_data.apply(
+            lambda row: f"<b>Accident Type:</b> {row.get('AccidentType_en', 'N/A')}<br>" +
+                       f"<b>Severity:</b> {row.get('AccidentSeverityCategory_en', 'N/A')}<br>" +
+                       f"<b>Date:</b> {row.get('AccidentMonth_en', 'N/A')} {row.get('AccidentYear', 'N/A')}<br>" +
+                       f"<b>Time:</b> {row.get('AccidentHour_text', 'N/A')}<br>" +
+                       f"<b>Road Type:</b> {row.get('RoadType_en', 'N/A')}<br>" +
+                       f"<b>Canton:</b> {row.get('CantonCode', 'N/A')}",
+            axis=1
+        )
+        
+        # Create color mapping based on accident severity
+        color_column = 'AccidentSeverityCategory'
+        
+        # Create the map
+        fig = px.scatter_mapbox(
+            viz_data,
+            lat='latitude',
+            lon='longitude',
+            hover_name='AccidentUID',
+            hover_data={
+                'latitude': False,
+                'longitude': False,
+                'AccidentUID': False,
+                'hover_text': True
+            },
+            color=color_column,
+            zoom=zoom,
+            height=800,
+            title='Road Traffic Accidents in Zurich'
+        )
+        
+        # Update hover template to use the custom hover_text
+        fig.update_traces(
+            hovertemplate="%{customdata[0]}",
+            marker=dict(size=8)
+        )
+        
+        # Update the map layout
+        fig.update_layout(
+            mapbox_style=map_type,
+            margin={"r": 0, "t": 50, "l": 0, "b": 0},
+            legend_title_text='Accident Severity'
+        )
+        
+        # Show the figure
+        fig.show()
+        
+        return fig
 
 
 # Example usage
@@ -140,5 +216,8 @@ clean_dataset = processor.remove_language_columns()
 print(f"Original dataset shape: {raw_dataset.shape}")
 print(f"Processed dataset shape: {clean_dataset.shape}")
 print("\nColumns in processed dataset:")
-for col in clean_dataset.columns:
+for col in clean_dataset.columns[:10]:  # Show just the first 10 columns
     print(f"- {col}")
+
+# Visualize the data on a map
+processor.visualize_data(zoom=12)
