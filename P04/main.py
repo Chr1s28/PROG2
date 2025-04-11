@@ -160,7 +160,7 @@ class AccidentDataProcessor:
                     lat=category_data['latitude'],
                     lon=category_data['longitude'],
                     mode='markers',
-                    marker=dict(size=4),
+                    marker=dict(size=8),
                     name=severity,
                     hoverinfo='text'
                 ))
