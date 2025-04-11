@@ -150,6 +150,13 @@ class AccidentDataProcessor:
         fig = go.Figure()
         
         if viz_type.lower() == 'scatter':
+            # Create a color mapping for accident severity categories
+            severity_categories = viz_data['AccidentSeverityCategory'].unique()
+            severity_map = {cat: i for i, cat in enumerate(severity_categories)}
+            
+            # Map categorical values to numeric values
+            color_values = viz_data['AccidentSeverityCategory'].map(severity_map)
+            
             # Add scatter plot
             fig.add_trace(go.Scattermapbox(
                 lat=viz_data['latitude'],
@@ -157,9 +164,14 @@ class AccidentDataProcessor:
                 mode='markers',
                 marker=dict(
                     size=4,
-                    color=viz_data['AccidentSeverityCategory'],
+                    color=color_values,
                     colorscale='Viridis',
-                    showscale=True
+                    showscale=True,
+                    colorbar=dict(
+                        title="Accident Severity",
+                        tickvals=list(severity_map.values()),
+                        ticktext=list(severity_map.keys())
+                    )
                 ),
                 hoverinfo='text'
             ))
