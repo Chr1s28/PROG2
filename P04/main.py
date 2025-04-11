@@ -3,6 +3,7 @@ import requests_cache
 import pandas as pd
 import re
 import plotly.express as px
+import plotly.graph_objects as go
 from pyproj import Transformer
 from datetime import timedelta
 
@@ -120,18 +121,15 @@ class AccidentDataProcessor:
             self.remove_language_columns()
         return self.processed_data
     
-    def visualize_data(self):
+    def visualize_data(self, viz_type='scatter'):
         """
         Visualize accident locations on an interactive map using Plotly.
         
-        :param map_type: Type of map to display ('open-street-map', 'carto-positron', etc.)
-        :type map_type: str
-        :param zoom: Initial zoom level for the map
-        :type zoom: int
+        :param viz_type: Type of visualization ('scatter' or 'heatmap')
+        :type viz_type: str
         :return: Plotly figure object
         :rtype: plotly.graph_objects.Figure
         """
-
         if self.processed_data is None:
             self.remove_language_columns()
         
@@ -148,28 +146,48 @@ class AccidentDataProcessor:
         viz_data['longitude'] = [coord[0] for coord in coordinates]
         viz_data['latitude'] = [coord[1] for coord in coordinates]
         
-        color_column = 'AccidentSeverityCategory'
+        # Create the figure
+        fig = go.Figure()
         
-        fig = px.scatter_map(
-            viz_data,
-            lat='latitude',
-            lon='longitude',
-            hover_name='AccidentUID',
-            color=color_column,
-            zoom=13,
-            height=800,
-            title='Road Traffic Accidents in Zurich'
-        )
+        if viz_type.lower() == 'scatter':
+            # Add scatter plot
+            fig.add_trace(go.Scattermapbox(
+                lat=viz_data['latitude'],
+                lon=viz_data['longitude'],
+                mode='markers',
+                marker=dict(
+                    size=4,
+                    color=viz_data['AccidentSeverityCategory'],
+                    colorscale='Viridis',
+                    showscale=True
+                ),
+                hoverinfo='text'
+            ))
+            
+        elif viz_type.lower() == 'heatmap':
+            # Add heatmap
+            fig.add_trace(go.Densitymapbox(
+                lat=viz_data['latitude'],
+                lon=viz_data['longitude'],
+                z=1,  # Uniform weight for each point
+                radius=10,
+                colorscale='Hot',
+                hoverinfo='none'
+            ))
         
-        fig.update_traces(
-            hovertemplate="%{customdata[0]}",
-            marker=dict(size=4)
-        )
-        
+        # Update layout
         fig.update_layout(
-            map_style='open-street-map',
+            mapbox=dict(
+                style='open-street-map',
+                center=dict(
+                    lat=viz_data['latitude'].mean(),
+                    lon=viz_data['longitude'].mean()
+                ),
+                zoom=13
+            ),
             margin={"r": 0, "t": 50, "l": 0, "b": 0},
-            legend_title_text='Accident Severity'
+            title='Road Traffic Accidents in Zurich',
+            height=800
         )
         
         fig.show()
@@ -187,5 +205,10 @@ raw_dataset = downloader.load_as_dataframe()
 processor = AccidentDataProcessor(raw_dataset)
 clean_dataset = processor.remove_language_columns()
 
-# Visualize the data on a map
-processor.visualize_data()
+# Visualize the data as scatter points
+print("Generating scatter map...")
+processor.visualize_data(viz_type='scatter')
+
+# Visualize the data as a heatmap
+print("Generating heatmap...")
+processor.visualize_data(viz_type='heatmap')
