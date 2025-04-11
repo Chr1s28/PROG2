@@ -129,9 +129,9 @@ class AccidentDataProcessor:
         
         # Vehicle involvement
         vehicle_stats = {
-            'Pedestrian': data['AccidentInvolvingPedestrian'].value_counts().get('true', 0),
-            'Bicycle': data['AccidentInvolvingBicycle'].value_counts().get('true', 0),
-            'Motorcycle': data['AccidentInvolvingMotorcycle'].value_counts().get('true', 0)
+            'Pedestrian': (data['AccidentInvolvingPedestrian'] == 'true').sum(),
+            'Bicycle': (data['AccidentInvolvingBicycle'] == 'true').sum(),
+            'Motorcycle': (data['AccidentInvolvingMotorcycle'] == 'true').sum()
         }
         stats['vehicle_involvement'] = vehicle_stats
         
