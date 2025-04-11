@@ -156,7 +156,7 @@ class AccidentDataProcessor:
                 category_data = viz_data[viz_data['AccidentSeverityCategory'] == severity]
                 
                 # Add a trace for this severity category
-                fig.add_trace(go.Scattermap(
+                fig.add_trace(go.Scattermapbox(
                     lat=category_data['latitude'],
                     lon=category_data['longitude'],
                     mode='markers',
@@ -167,7 +167,7 @@ class AccidentDataProcessor:
             
         elif viz_type.lower() == 'heatmap':
             # Add heatmap with array of ones for z values
-            fig.add_trace(go.Densitymap(
+            fig.add_trace(go.Densitymapbox(
                 lat=viz_data['latitude'],
                 lon=viz_data['longitude'],
                 z=[1] * len(viz_data),  # Array of ones with same length as data
