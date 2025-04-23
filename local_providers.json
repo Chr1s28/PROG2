@@ -1,0 +1,42 @@
+{
+    "CH": {
+        "name": "SBB/CFF/FFS",
+        "url": "https://www.sbb.ch"
+    },
+    "FR": {
+        "name": "SNCF",
+        "url": "https://www.sncf-connect.com"
+    },
+    "DE": {
+        "name": "Deutsche Bahn",
+        "url": "https://www.bahn.com"
+    },
+    "AT": {
+        "name": "ÖBB",
+        "url": "https://www.oebb.at"
+    },
+    "IT": {
+        "name": "Trenitalia",
+        "url": "https://www.trenitalia.com"
+    },
+    "ES": {
+        "name": "Renfe",
+        "url": "https://www.renfe.com"
+    },
+    "BE": {
+        "name": "SNCB/NMBS",
+        "url": "https://www.belgiantrain.be"
+    },
+    "NL": {
+        "name": "NS (Nederlandse Spoorwegen)",
+        "url": "https://www.ns.nl"
+    },
+    "LU": {
+        "name": "CFL",
+        "url": "https://www.cfl.lu"
+    },
+    "GB": {
+        "name": "National Rail",
+        "url": "https://www.nationalrail.co.uk"
+    }
+}
