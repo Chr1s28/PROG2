@@ -1,11 +1,11 @@
 import json
 import math
-
-import reverse_geocoder as rg
+from geopy.geocoders import Nominatim
+from geopy.exc import GeocoderTimedOut, GeocoderServiceError
 from geopy.distance import distance as geopy_distance # Use alias to avoid name clash
 
 from P05.api_service import ApiService
-from P05.models import Connection, Location
+from P05.models import Connection, Location, Coordinates # Import Coordinates
 
 
 class Interface:
@@ -13,6 +13,18 @@ class Interface:
         self.api_service = ApiService()
         self.local_providers = self._load_local_providers()
         self.covered_stations = self.read_covered_stations() # Load stations after providers
+
+        # --- Initialize Nominatim Geocoder ---
+        # !!! IMPORTANT: Replace with your Nominatim instance details and user agent !!!
+        nominatim_domain = 'YOUR_NOMINATIM_DOMAIN_OR_IP' # e.g., 'localhost:8080' or 'nominatim.example.com'
+        app_user_agent = 'YourApp/1.0 (your@email.com)' # Replace with your app name/contact
+        try:
+            self.geolocator = Nominatim(domain=nominatim_domain, user_agent=app_user_agent, timeout=10)
+            print(f"Initialized geolocator for domain: {nominatim_domain}")
+        except Exception as e:
+            print(f"FATAL: Could not initialize Nominatim geolocator: {e}")
+            self.geolocator = None # Ensure geolocator is None if init fails
+        # --- End Initialization ---
 
     def _load_local_providers(self):
         """Loads the local provider data from the JSON file."""
@@ -98,18 +110,33 @@ class Interface:
         return intermediate_connections
 
     def get_local_provider(self, location: Location) -> dict[str, str] | None:
-        """Looks up the local transport provider based on location coordinates."""
+        """Looks up the local transport provider based on location coordinates using Nominatim."""
+        if not self.geolocator:
+            print("Error: Geolocator not initialized.")
+            return None
         if not location or not location.coordinate or not self.local_providers:
             return None
+
         try:
             coords = (location.coordinate.latitude, location.coordinate.longitude)
-            results = rg.search(coords, mode=1) # More efficient mode
-            if results:
-                country_cd = results[0]['cc']
-                return self.local_providers.get(country_cd) # Use .get for safety
+            # Use Nominatim for reverse geocoding
+            location_info = self.geolocator.reverse(coords, language='en', exactly_one=True)
+
+            if location_info and location_info.raw.get('address'):
+                address = location_info.raw['address']
+                country_code = address.get('country_code')
+                if country_code:
+                    # Use uppercase country code consistent with local_providers.json
+                    return self.local_providers.get(country_code.upper())
+                else:
+                    print(f"Warning: Could not determine country code for {location.name} from Nominatim.")
+                    return None
             else:
-                print(f"Warning: Could not determine country for {location.name}")
+                print(f"Warning: No address details found in Nominatim reverse lookup for {location.name}.")
                 return None
+        except (GeocoderTimedOut, GeocoderServiceError) as e:
+             print(f"Error: Nominatim reverse geocoding failed: {e}")
+             return None
         except Exception as e:
             print(f"Error during reverse geocoding or provider lookup: {e}")
             return None
@@ -166,11 +193,40 @@ class Interface:
 
         destination_obj = self.api_service.get_location(destination_name)
         if not destination_obj:
-            print(f"Error: Could not find destination station '{destination_name}'. Please check spelling.")
-            return
+            print(f"Info: Destination '{destination_name}' not found in transport API. Trying geocoding...")
+            if not self.geolocator:
+                 print("Error: Geolocator not initialized, cannot find coordinates for destination.")
+                 return
+
+            try:
+                # Use Nominatim geocode as fallback
+                geo_location = self.geolocator.geocode(destination_name)
+                if geo_location:
+                    print(f"Info: Found coordinates for '{destination_name}' via geocoding.")
+                    # Create a minimal Location object for calculations
+                    destination_coords = Coordinates(type='WGS84', latitude=geo_location.latitude, longitude=geo_location.longitude)
+                    # Use a placeholder ID (e.g., -1) as it's not from the transport API
+                    destination_obj = Location(id=-1, name=destination_name, coordinate=destination_coords)
+                else:
+                    print(f"Error: Could not find coordinates for destination '{destination_name}' via geocoding either.")
+                    return
+            except (GeocoderTimedOut, GeocoderServiceError) as e:
+                 print(f"Error: Nominatim geocoding failed for destination: {e}")
+                 return
+            except Exception as e:
+                 print(f"Error during destination geocoding: {e}")
+                 return
+
+        # Proceed only if we have a valid destination_obj (either from API or geocoding)
+        if not destination_obj:
+             # This case should ideally not be reached due to prior returns, but added for safety
+             print("Error: Failed to determine destination location.")
+             return
+
 
         print("\nSearching for connections...")
-        direct_connection = self.get_direct_connection(origin_obj.name, destination_obj.name)
+        # Use origin_obj.name which is guaranteed to be from the API
+        direct_connection = self.get_direct_connection(origin_obj.name, destination_name)
 
         connections_to_display = []
         is_direct = False
@@ -206,4 +262,8 @@ class Interface:
 
 if __name__ == "__main__":
     interface = Interface()
-    interface.execute()
+    # Only run execute if the geolocator was initialized successfully
+    if interface.geolocator:
+        interface.execute()
+    else:
+        print("Exiting due to geolocator initialization failure.")
