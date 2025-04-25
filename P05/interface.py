@@ -74,15 +74,6 @@ class Interface:
         connection = self.api_service.get_next_connection(origin, destination)
         return connection
 
-    def get_intermediate_connections(self, origin: str, destination: str) -> list[Connection]:
-        origin_obj = self.api_service.get_location(origin)
-        destination_obj = self.api_service.get_location(destination)
-
-        connection_stations = []
-        for covered_station in self.covered_stations:
-            if self.angular_deviation(origin_obj, destination_obj, covered_station) <= 20:
-                connection_stations.append(covered_station)
-
     def get_intermediate_connections_by_bearing(
         self, origin_obj: Location, destination_obj: Location
     ) -> list[Connection]:
@@ -122,6 +113,42 @@ class Interface:
         except Exception as e:
             print(f"Error during reverse geocoding or provider lookup: {e}")
             return None
+
+    def _display_connection_option(
+        self,
+        conn: Connection,
+        option_index: int,
+        origin_obj: Location,
+        destination_obj: Location,
+        total_distance: float,
+        is_direct: bool
+    ):
+        """Formats and prints the details for a single connection option."""
+        if not conn: return
+
+        intermediate_station = conn.to.station
+        covered_distance = self._calculate_distance(origin_obj, intermediate_station)
+        percentage = (covered_distance / total_distance * 100) if total_distance > 0 else 0
+
+        header = f"--- Option {option_index} {'(Direct)' if is_direct else '(Intermediate via '+intermediate_station.name+')'} ---"
+        print(f"\n{header}")
+        print(f"  Travel:     {conn.from_.station.name} -> {intermediate_station.name}")
+        print(f"  Departure:  {conn.from_.departure.strftime('%Y-%m-%d %H:%M')} (Platform: {conn.from_.platform or 'N/A'})")
+        print(f"  Arrival:    {conn.to.arrival.strftime('%Y-%m-%d %H:%M')}")
+        print(f"  Duration:   {conn.duration}")
+
+        if not is_direct and total_distance > 0:
+            print(f"  Coverage:   Approx. {covered_distance:.1f} km ({percentage:.0f}% of total distance)")
+
+        if not is_direct:
+            provider = self.get_local_provider(intermediate_station)
+            print(f"  Next Step:  To continue towards {destination_obj.name},")
+            if provider:
+                print(f"              search connections from {intermediate_station.name} using {provider['name']} ({provider['url']})")
+            else:
+                print(f"              search connections from {intermediate_station.name} (Provider lookup failed)")
+        print("-" * len(header))
+
 
     def execute(self):
         """Main execution loop for the user interface."""
@@ -168,29 +195,14 @@ class Interface:
             print(f"(Approx. total distance: {total_distance:.1f} km)")
 
         for i, conn in enumerate(connections_to_display):
-            if not conn:
-                continue
-
-            intermediate_station = conn.to.station
-            covered_distance = self._calculate_distance(origin_obj, intermediate_station)
-            percentage = (covered_distance / total_distance * 100) if total_distance > 0 else 0
-
-            print(f"\n--- Option {i+1} {'(Direct)' if is_direct else '(Intermediate via '+intermediate_station.name+')'} ---")
-            print(f"  Travel:     {conn.from_.station.name} -> {intermediate_station.name}")
-            print(f"  Departure:  {conn.from_.departure.strftime('%Y-%m-%d %H:%M')} (Platform: {conn.from_.platform or 'N/A'})")
-            print(f"  Arrival:    {conn.to.arrival.strftime('%Y-%m-%d %H:%M')}")
-            print(f"  Duration:   {conn.duration}")
-            if not is_direct and total_distance > 0:
-                print(f"  Coverage:   Approx. {covered_distance:.1f} km ({percentage:.0f}% of total distance)")
-
-            if not is_direct:
-                provider = self.get_local_provider(intermediate_station)
-                print(f"  Next Step:  To continue towards {destination_obj.name},")
-                if provider:
-                    print(f"              search connections from {intermediate_station.name} using {provider['name']} ({provider['url']})")
-                else:
-                    print(f"              search connections from {intermediate_station.name} (Provider lookup failed)")
-            print("-" * (16 + len(intermediate_station.name) if not is_direct else 18))
+            self._display_connection_option(
+                conn=conn,
+                option_index=i + 1,
+                origin_obj=origin_obj,
+                destination_obj=destination_obj,
+                total_distance=total_distance,
+                is_direct=is_direct
+            )
 
 if __name__ == "__main__":
     interface = Interface()
