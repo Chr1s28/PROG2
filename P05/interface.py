@@ -168,7 +168,8 @@ class Interface:
             print(f"(Approx. total distance: {total_distance:.1f} km)")
 
         for i, conn in enumerate(connections_to_display):
-            if not conn: continue
+            if not conn:
+                continue
 
             intermediate_station = conn.to.station
             covered_distance = self._calculate_distance(origin_obj, intermediate_station)
@@ -190,3 +191,7 @@ class Interface:
                 else:
                     print(f"              search connections from {intermediate_station.name} (Provider lookup failed)")
             print("-" * (16 + len(intermediate_station.name) if not is_direct else 18))
+
+if __name__ == "__main__":
+    interface = Interface()
+    interface.execute()
