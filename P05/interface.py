@@ -13,7 +13,7 @@ class Interface:
         self.api_service = ApiService()
 
     def read_covered_stations(self):
-        with open("test.json", encoding="utf8") as f:
+        with open("reachable_stations.json", encoding="utf8") as f:
             data = json.load(f)
 
         return [Location(**station) for station in data]
