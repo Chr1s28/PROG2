@@ -10,17 +10,22 @@ HOME_STATION = "Zürich HB"
 potential_border_stations = [
     # Germany
     "Stuttgart Hbf", "Freiburg(Breisgau) Hbf", "Konstanz", "Singen(Hohentwiel)",
+    "Karlsruhe Hbf", "Ulm Hbf", "Lörrach Hbf", "Waldshut", "Offenburg", "Mannheim Hbf",
+    "Augsburg Hbf", "Lindau-Reutin", "Lindau-Insel",
     # France
     "Paris Gare de Lyon", "Mulhouse", "Lyon Part-Dieu", "Annemasse", "Bellegarde(Ain)", "Besançon Viotte",
+    "Strasbourg", "Colmar", "Belfort-Montbéliard TGV", "Dijon Ville", "Chambéry - Challes-les-Eaux",
+    "Grenoble", "Pontarlier", "St Louis La Chaussée", "Nancy",
     # Italy
     "Milano Centrale", "Domodossola", "Como S. Giovanni", "Tirano", "Varese", "Gallarate",
+    "Chiasso", "Torino Porta Susa", "Torino Porta Nuova", "Verona Porta Nuova", "Lecco",
+    "Genoa Piazza Principe", "Bolzano/Bozen",
     # Austria
-    "Bregenz", "Feldkirch",
+    "Bregenz", "Feldkirch", "Innsbruck Hbf", "Salzburg Hbf", "Bludenz", "Landeck-Zams",
     # Liechtenstein
     "Schaan-Vaduz",
-    # Add more potential stations here...
-    "Lindau-Reutin", # Example of a station close to border
-    "St Louis La Chaussée" # Example near Basel
+    # Switzerland (useful border points)
+    "St. Margrethen",
 ]
 
 OUTPUT_FILENAME = "covered_stations.json"
