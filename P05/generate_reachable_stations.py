@@ -6,7 +6,7 @@ from requests.exceptions import RequestException
 # --- Configuration ---
 HOME_STATION = "Zürich HB"
 
-# List of potential stations to check (expand this list!)
+# List of potential stations to check
 potential_border_stations = [
     # Germany
     "Stuttgart Hbf", "Freiburg(Breisgau) Hbf", "Konstanz", "Singen(Hohentwiel)",
@@ -24,11 +24,11 @@ potential_border_stations = [
     "Bregenz", "Feldkirch", "Innsbruck Hbf", "Salzburg Hbf", "Bludenz", "Landeck-Zams",
     # Liechtenstein
     "Schaan-Vaduz",
-    # Switzerland (useful border points)
+    # Switzerland
     "St. Margrethen",
 ]
 
-OUTPUT_FILENAME = "covered_stations.json"
+OUTPUT_FILENAME = "reachable_stations.json"
 # --- End Configuration ---
 
 def generate_reachable_list(origin: str, destinations: list[str]) -> list[dict]:
@@ -43,7 +43,6 @@ def generate_reachable_list(origin: str, destinations: list[str]) -> list[dict]:
     for i, dest in enumerate(destinations):
         print(f"[{i+1}/{len(destinations)}] Checking: {dest} ... ", end="")
         try:
-            # Use the existing ApiService method
             connection = api.get_next_connection(origin, dest)
 
             if connection:
@@ -51,7 +50,6 @@ def generate_reachable_list(origin: str, destinations: list[str]) -> list[dict]:
                 reachable_stations.append(station_data)
                 print("Reachable")
             else:
-                # No direct connection found by the API
                 print("Not directly reachable")
 
         except RequestException as e:
@@ -59,7 +57,6 @@ def generate_reachable_list(origin: str, destinations: list[str]) -> list[dict]:
         except Exception as e:
             print(f"UNEXPECTED ERROR checking {dest}: {e}")
 
-        # Be polite to the API server
         time.sleep(0.3) # Small delay between requests
 
     return reachable_stations

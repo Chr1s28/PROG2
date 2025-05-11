@@ -1,0 +1,299 @@
+[
+    {
+        "id": 8029034,
+        "name": "Stuttgart Hbf",
+        "coordinate": {
+            "type": "WGS84",
+            "latitude": 48.784087,
+            "longitude": 9.181561
+        }
+    },
+    {
+        "id": 8014350,
+        "name": "Freiburg(Breisgau) Hbf",
+        "coordinate": {
+            "type": "WGS84",
+            "latitude": 47.997696,
+            "longitude": 7.841187
+        }
+    },
+    {
+        "id": 8014586,
+        "name": "Konstanz",
+        "coordinate": {
+            "type": "WGS84",
+            "latitude": 47.658756,
+            "longitude": 9.177301
+        }
+    },
+    {
+        "id": 8014558,
+        "name": "Singen (Hohentwiel)",
+        "coordinate": {
+            "type": "WGS84",
+            "latitude": 47.758877,
+            "longitude": 8.841261
+        }
+    },
+    {
+        "id": 8029103,
+        "name": "Ulm Hbf",
+        "coordinate": {
+            "type": "WGS84",
+            "latitude": 48.399408,
+            "longitude": 9.982569
+        }
+    },
+    {
+        "id": 8014441,
+        "name": "Lörrach Hbf",
+        "coordinate": {
+            "type": "WGS84",
+            "latitude": 47.614049,
+            "longitude": 7.665431
+        }
+    },
+    {
+        "id": 8014474,
+        "name": "Waldshut",
+        "coordinate": {
+            "type": "WGS84",
+            "latitude": 47.621366,
+            "longitude": 8.219527
+        }
+    },
+    {
+        "id": 8002301,
+        "name": "Lindau-Reutin",
+        "coordinate": {
+            "type": "WGS84",
+            "latitude": 47.552383,
+            "longitude": 9.703297
+        }
+    },
+    {
+        "id": 8002371,
+        "name": "Lindau-Insel",
+        "coordinate": {
+            "type": "WGS84",
+            "latitude": 47.544342,
+            "longitude": 9.68047
+        }
+    },
+    {
+        "id": 8768600,
+        "name": "Paris Gare de Lyon",
+        "coordinate": {
+            "type": "WGS84",
+            "latitude": 48.844997,
+            "longitude": 2.373915
+        }
+    },
+    {
+        "id": 8718206,
+        "name": "Mulhouse",
+        "coordinate": {
+            "type": "WGS84",
+            "latitude": 47.741954,
+            "longitude": 7.343072
+        }
+    },
+    {
+        "id": 8772319,
+        "name": "Lyon Part Dieu",
+        "coordinate": {
+            "type": "WGS84",
+            "latitude": 45.76062,
+            "longitude": 4.859965
+        }
+    },
+    {
+        "id": 8774549,
+        "name": "Annemasse",
+        "coordinate": {
+            "type": "WGS84",
+            "latitude": 46.199355,
+            "longitude": 6.236394
+        }
+    },
+    {
+        "id": 1401391,
+        "name": "Bellegarde(Ain), gare routière",
+        "coordinate": {
+            "type": "WGS84",
+            "latitude": 46.110956,
+            "longitude": 5.825429
+        }
+    },
+    {
+        "id": 8771800,
+        "name": "Besançon Viotte",
+        "coordinate": {
+            "type": "WGS84",
+            "latitude": 47.247349,
+            "longitude": 6.022024
+        }
+    },
+    {
+        "id": 8718201,
+        "name": "Colmar",
+        "coordinate": {
+            "type": "WGS84",
+            "latitude": 48.072472,
+            "longitude": 7.346578
+        }
+    },
+    {
+        "id": 8730082,
+        "name": "Belfort-Montbéliard TGV",
+        "coordinate": {
+            "type": "WGS84",
+            "latitude": 47.585948,
+            "longitude": 6.897659
+        }
+    },
+    {
+        "id": 8774100,
+        "name": "Chambéry-Challes-les-Eaux",
+        "coordinate": {
+            "type": "WGS84",
+            "latitude": 45.571531,
+            "longitude": 5.919711
+        }
+    },
+    {
+        "id": 8774700,
+        "name": "Grenoble",
+        "coordinate": {
+            "type": "WGS84",
+            "latitude": 45.191238,
+            "longitude": 5.714087
+        }
+    },
+    {
+        "id": 1401770,
+        "name": "Pontarlier, gare",
+        "coordinate": {
+            "type": "WGS84",
+            "latitude": 46.901259,
+            "longitude": 6.351458
+        }
+    },
+    {
+        "id": 8718101,
+        "name": "Saint-Louis la Chaussée",
+        "coordinate": {
+            "type": "WGS84",
+            "latitude": 47.60944,
+            "longitude": 7.531264
+        }
+    },
+    {
+        "id": 8714100,
+        "name": "Nancy",
+        "coordinate": {
+            "type": "WGS84",
+            "latitude": 48.689815,
+            "longitude": 6.174208
+        }
+    },
+    {
+        "id": 8301700,
+        "name": "Milano Centrale",
+        "coordinate": {
+            "type": "WGS84",
+            "latitude": 45.48715,
+            "longitude": 9.204833
+        }
+    },
+    {
+        "id": 8301003,
+        "name": "Domodossola (I)",
+        "coordinate": {
+            "type": "WGS84",
+            "latitude": 46.115288,
+            "longitude": 8.296238
+        }
+    },
+    {
+        "id": 8301307,
+        "name": "Como S. Giovanni",
+        "coordinate": {
+            "type": "WGS84",
+            "latitude": 45.808969,
+            "longitude": 9.072713
+        }
+    },
+    {
+        "id": 8509369,
+        "name": "Tirano",
+        "coordinate": {
+            "type": "WGS84",
+            "latitude": 46.215752,
+            "longitude": 10.166627
+        }
+    },
+    {
+        "id": 8301205,
+        "name": "Varese",
+        "coordinate": {
+            "type": "WGS84",
+            "latitude": 45.816212,
+            "longitude": 8.833288
+        }
+    },
+    {
+        "id": 8301030,
+        "name": "Gallarate",
+        "coordinate": {
+            "type": "WGS84",
+            "latitude": 45.659752,
+            "longitude": 8.798547
+        }
+    },
+    {
+        "id": 8505307,
+        "name": "Chiasso",
+        "coordinate": {
+            "type": "WGS84",
+            "latitude": 45.832171,
+            "longitude": 9.031446
+        }
+    },
+    {
+        "id": 8102336,
+        "name": "Bregenz",
+        "coordinate": {
+            "type": "WGS84",
+            "latitude": 47.503007,
+            "longitude": 9.739635
+        }
+    },
+    {
+        "id": 1200730,
+        "name": "Feldkirch, Bahnhof",
+        "coordinate": {
+            "type": "WGS84",
+            "latitude": 47.241472,
+            "longitude": 9.603742
+        }
+    },
+    {
+        "id": 8101243,
+        "name": "Schaan-Vaduz",
+        "coordinate": {
+            "type": "WGS84",
+            "latitude": 47.168293,
+            "longitude": 9.507799
+        }
+    },
+    {
+        "id": 8506314,
+        "name": "St. Margrethen SG",
+        "coordinate": {
+            "type": "WGS84",
+            "latitude": 47.453215,
+            "longitude": 9.638266
+        }
+    }
+]

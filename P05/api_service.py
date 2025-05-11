@@ -12,9 +12,12 @@ class ApiService:
         self.session.mount("https://", adapter)
         self.session.mount("http://", adapter)
 
+        self.connections_url = "https://transport.opendata.ch/v1/connections"
+        self.locations_url = "http://transport.opendata.ch/v1/locations"
+
     def get_next_connection(self, origin: str, destination: str) -> Connection | None:
         resp = self.session.get(
-            "https://transport.opendata.ch/v1/connections",
+            self.connections_url,
             params={"from": origin, "to": destination, "limit": 1},
             timeout=10,
         )
@@ -27,7 +30,9 @@ class ApiService:
             return None
 
     def get_location(self, location: str) -> Location | None:
-        resp = self.session.get("http://transport.opendata.ch/v1/locations", params={"query": location, "type": "station", "limit": 1}, timeout=10)
+        resp = self.session.get(
+            self.locations_url, params={"query": location, "type": "station", "limit": 1}, timeout=10
+        )
         resp.raise_for_status()
         data = resp.json()
 

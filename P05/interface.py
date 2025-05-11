@@ -14,17 +14,14 @@ class Interface:
         self.local_providers = self._load_local_providers()
         self.covered_stations = self.read_covered_stations() # Load stations after providers
 
-        # --- Initialize Nominatim Geocoder ---
-        # !!! IMPORTANT: Replace with your Nominatim instance details and user agent !!!
-        nominatim_domain = 'YOUR_NOMINATIM_DOMAIN_OR_IP' # e.g., 'localhost:8080' or 'nominatim.example.com'
-        app_user_agent = 'YourApp/1.0 (your@email.com)' # Replace with your app name/contact
+        nominatim_domain = 'https://nominatim.openstreetmap.org'
+        app_user_agent = 'PROG2/1.0 (boschr02@students.zhaw.ch)'
         try:
             self.geolocator = Nominatim(domain=nominatim_domain, user_agent=app_user_agent, timeout=10)
             print(f"Initialized geolocator for domain: {nominatim_domain}")
         except Exception as e:
             print(f"FATAL: Could not initialize Nominatim geolocator: {e}")
-            self.geolocator = None # Ensure geolocator is None if init fails
-        # --- End Initialization ---
+            self.geolocator = None
 
     def _load_local_providers(self):
         """Loads the local provider data from the JSON file."""
@@ -119,14 +116,12 @@ class Interface:
 
         try:
             coords = (location.coordinate.latitude, location.coordinate.longitude)
-            # Use Nominatim for reverse geocoding
             location_info = self.geolocator.reverse(coords, language='en', exactly_one=True)
 
             if location_info and location_info.raw.get('address'):
                 address = location_info.raw['address']
                 country_code = address.get('country_code')
                 if country_code:
-                    # Use uppercase country code consistent with local_providers.json
                     return self.local_providers.get(country_code.upper())
                 else:
                     print(f"Warning: Could not determine country code for {location.name} from Nominatim.")
@@ -151,7 +146,8 @@ class Interface:
         is_direct: bool
     ):
         """Formats and prints the details for a single connection option."""
-        if not conn: return
+        if not conn:
+            return
 
         intermediate_station = conn.to.station
         covered_distance = self._calculate_distance(origin_obj, intermediate_station)
@@ -262,7 +258,6 @@ class Interface:
 
 if __name__ == "__main__":
     interface = Interface()
-    # Only run execute if the geolocator was initialized successfully
     if interface.geolocator:
         interface.execute()
     else:
